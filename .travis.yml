@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+    - docker
+
+install:
+    - docker build -t paperless .
+
+script:
+    - docker run --rm paperless test
+
