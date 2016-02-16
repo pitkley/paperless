@@ -6,7 +6,8 @@ Requirements
 You need a Linux machine or Unix-like setup (theoretically an Apple machine
 should work) that has the following software installed on it:
 
-* `Python3`_ (with development libraries, pip and virtualenv)
+* `Python3`_ (at least version 3.4, with development libraries, pip and
+  virtualenv)
 * `GNU Privacy Guard`_
 * `Tesseract`_
 * `Imagemagick`_

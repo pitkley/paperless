@@ -5,7 +5,6 @@ from multiprocessing.pool import Pool
 import itertools
 
 import langdetect
-import os
 import re
 import subprocess
 
@@ -17,6 +16,7 @@ from PIL import Image
 from django.conf import settings
 from django.utils import timezone
 from django.template.defaultfilters import slugify
+from pathlib import Path
 
 from logger.models import Log
 from paperless.db import GnuPG
@@ -27,7 +27,7 @@ from .languages import ISO639
 
 def image_to_string(args):
     self, png, lang = args
-    with Image.open(os.path.join(self.SCRATCH, png)) as f:
+    with Image.open(self.SCRATCH / png) as f:
         return self.OCR.image_to_string(f, lang=lang)
 
 
@@ -49,24 +49,24 @@ class Consumer(object):
       5. Delete the document and image(s)
     """
 
-    SCRATCH = settings.SCRATCH_DIR
+    SCRATCH = Path(settings.SCRATCH_DIR)
     CONVERT = settings.CONVERT_BINARY
-    CONSUME = settings.CONSUMPTION_DIR
+    CONSUME = Path(settings.CONSUMPTION_DIR)
     THREADS = int(settings.OCR_THREADS) if settings.OCR_THREADS else None
 
     OCR = pyocr.get_available_tools()[0]
     DEFAULT_OCR_LANGUAGE = settings.OCR_LANGUAGE
 
     REGEX_TITLE = re.compile(
-        r"^.*/(.*)\.(pdf|jpe?g|png|gif|tiff)$",
+        r"^(.*)\.(pdf|jpe?g|png|gif|tiff)$",
         flags=re.IGNORECASE
     )
     REGEX_SENDER_TITLE = re.compile(
-        r"^.*/(.+) - (.*)\.(pdf|jpe?g|png|gif|tiff)$",
+        r"^(.+) - (.*)\.(pdf|jpe?g|png|gif|tiff)$",
         flags=re.IGNORECASE
     )
     REGEX_SENDER_TITLE_TAGS = re.compile(
-        r"^.*/(.*) - (.*) - ([a-z0-9\-,]*)\.(pdf|jpe?g|png|gif|tiff)$",
+        r"^(.*) - (.*) - ([a-z0-9\-,]*)\.(pdf|jpe?g|png|gif|tiff)$",
         flags=re.IGNORECASE
     )
 
@@ -75,7 +75,7 @@ class Consumer(object):
         self.verbosity = verbosity
 
         try:
-            os.makedirs(self.SCRATCH)
+            self.SCRATCH.mkdir(parents=True)
         except FileExistsError:
             pass
 
@@ -88,20 +88,16 @@ class Consumer(object):
                 "set."
             )
 
-        if not os.path.exists(self.CONSUME):
+        if not self.CONSUME.exists():
             raise ConsumerError(
                 "Consumption directory {} does not exist".format(self.CONSUME))
 
     def consume(self):
-
-        for doc in os.listdir(self.CONSUME):
-
-            doc = os.path.join(self.CONSUME, doc)
-
-            if not os.path.isfile(doc):
+        for doc in self.CONSUME.iterdir():
+            if not doc.is_file():
                 continue
 
-            if not re.match(self.REGEX_TITLE, doc):
+            if not re.match(self.REGEX_TITLE, doc.name):
                 continue
 
             if doc in self._ignore:
@@ -112,7 +108,8 @@ class Consumer(object):
 
             Log.info("Consuming {}".format(doc), Log.COMPONENT_CONSUMER)
 
-            tempdir = tempfile.mkdtemp(prefix="paperless", dir=self.SCRATCH)
+            tempdir = Path(tempfile.mkdtemp(prefix="paperless",
+                                            dir=str(self.SCRATCH)))
             pngs = self._get_greyscale(tempdir, doc)
 
             try:
@@ -132,15 +129,15 @@ class Consumer(object):
             Log.COMPONENT_CONSUMER
         )
 
-        png = os.path.join(tempdir, "convert-%04d.jpg")
+        png = tempdir / "convert-%04d.jpg"
 
         subprocess.Popen((
             self.CONVERT, "-density", "300", "-depth", "8",
-            "-type", "grayscale", doc, png
+            "-type", "grayscale", str(doc), str(png)
         )).wait()
 
-        pngs = [os.path.join(tempdir, f) for f in os.listdir(tempdir) if f.startswith("convert")]
-        return sorted(filter(lambda f: os.path.isfile(f), pngs))
+        pngs = [str(tempdir / f) for f in tempdir.glob("convert*") if f.is_file()]
+        return sorted(pngs)
 
     @staticmethod
     def _guess_language(text):
@@ -272,14 +269,14 @@ class Consumer(object):
 
     def _store(self, text, doc):
 
-        sender, title, tags, file_type = self._guess_attributes_from_name(doc)
+        sender, title, tags, file_type = self._guess_attributes_from_name(doc.name)
         tags = list(tags)
 
         lower_text = text.lower()
         relevant_tags = set(
             [t for t in Tag.objects.all() if t.matches(lower_text)] + tags)
 
-        stats = os.stat(doc)
+        stats = doc.stat()
 
         Log.debug("Saving record to database", Log.COMPONENT_CONSUMER)
 
@@ -300,7 +297,7 @@ class Consumer(object):
                 "Tagging with {}".format(tag_names), Log.COMPONENT_CONSUMER)
             document.tags.add(*relevant_tags)
 
-        with open(doc, "rb") as unencrypted:
+        with doc.open("rb") as unencrypted:
             with open(document.source_path, "wb") as encrypted:
                 Log.debug("Encrypting", Log.COMPONENT_CONSUMER)
                 encrypted.write(GnuPG.encrypted(unencrypted))
@@ -308,11 +305,11 @@ class Consumer(object):
     def _cleanup(self, tempdir, doc):
         # Remove temporary directory recursively
         Log.debug("Deleting directory {}".format(tempdir), Log.COMPONENT_CONSUMER)
-        shutil.rmtree(tempdir)
+        shutil.rmtree(str(tempdir))
 
         # Remove doc
         Log.debug("Deleting document {}".format(doc), Log.COMPONENT_CONSUMER)
-        os.unlink(doc)
+        doc.unlink()
 
     def _is_ready(self, doc):
         """
@@ -320,7 +317,7 @@ class Consumer(object):
         to by the uploader.
         """
 
-        t = os.stat(doc).st_mtime
+        t = doc.stat().st_mtime
 
         if self.stats.get(doc) == t:
             del(self.stats[doc])
