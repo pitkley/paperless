@@ -26,7 +26,7 @@ How to Use It
 
 The webserver is started via the ``manage.py`` script:
 
-.. code:: bash
+.. code-block:: bash
 
     $ /path/to/paperless/src/manage.py runserver
 
@@ -64,18 +64,18 @@ How to Use It
 
 The consumer is started via the ``manage.py`` script:
 
-.. code:: bash
+.. code-block:: bash
 
     $ /path/to/paperless/src/manage.py document_consumer
 
 This starts the service that will run in a loop, consuming PDF files as they
 appear in ``CONSUMPTION_DIR``.
 
-Note that this command runs continuously, so exiting it will mean your webserver
-disappears.  If you want to run this full-time (which is kind of the point)
-you'll need to have it start in the background -- something you'll need to
-figure out for your own system.  To get you started though, there are Systemd
-service files in the ``scripts`` directory.
+Note that this command runs continuously, so exiting it will mean your consumer
+stops.  If you want to run this full-time (which is kind of the point) you'll
+need to have it start in the background -- something you'll need to figure out
+for your own system.  To get you started though, there are Systemd service files
+in the ``scripts`` directory.
 
 
 .. _utilities-exporter:
@@ -85,7 +85,7 @@ The Exporter
 
 Tired of fiddling with *Paperless*, or just want to do something stupid and are
 afraid of accidentally damaging your files?  You can export all of your PDFs
-into neatly named, dated, and unencrypted.
+neatly named, dated, tagged and unencrypted.
 
 
 .. _utilities-exporter-howto:
@@ -95,13 +95,14 @@ How to Use It
 
 This too is done via the ``manage.py`` script:
 
-.. code:: bash
+.. code-block:: bash
 
     $ /path/to/paperless/src/manage.py document_exporter /path/to/somewhere
 
 This will dump all of your PDFs into ``/path/to/somewhere`` for you to do with
 as you please.  The naming scheme on export is identical to that used for
-import, so should you can now safely delete the entire project directly,
-database, encrypted PDFs and all, and later create it all again simply by
-running the consumer again and dumping all of these files into
-``CONSUMPTION_DIR``.
+import, so you can safely delete the entire project, including database and
+encrypted PDFS, and later create it all again simply by running the consumer
+again and dumping all of these files into ``CONSUMPTION_DIR``. Exporting and
+importing tags requires a bit more care, see the
+:ref:`migration guide <migrating>` for a detailed explanation.

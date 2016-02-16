@@ -18,14 +18,14 @@ Download
 The source is currently only available via GitHub, so grab it from there, either
 by using ``git``:
 
-.. code:: bash
+.. code-block:: bash
 
     $ git clone https://github.com/danielquinn/paperless.git
     $ cd paperless
 
 or just download the tarball and go that route:
 
-.. code:: bash
+.. code-block:: bash
 
     $ wget https://github.com/danielquinn/paperless/archive/master.zip
     $ unzip master.zip
@@ -51,18 +51,24 @@ Standard (Bare Metal)
 1. Install the requirements as per the :ref:`requirements <requirements>` page.
 2. Change to the ``src`` directory in this repo.
 3. Edit ``paperless/settings.py`` and be sure to set the values for:
-    * ``CONSUMPTION_DIR``: this is where your documents will be dumped to be
-      consumed by Paperless.
-    * ``PASSPHRASE``: this is the passphrase Paperless uses to encrypt/decrypt
-      the original document.  The default value attempts to source the
-      passphrase from the environment, so if you don't set it to a static value
-      here, you must set ``PAPERLESS_PASSPHRASE=some-secret-string`` on the
-      command line whenever invoking the consumer or webserver.
-    * ``OCR_THREADS``: this is the number of threads the OCR process will spawn
-      to process document pages in parallel. The default value gets sourced from
-      the environment-variable ``PAPERLESS_OCR_THREADS`` and expects it to be an
-      integer. If the variable is not set, Python determines the core-count of
-      your CPU and uses that value.
+
+   ``CONSUMPTION_DIR``
+     This is where your documents will be dumped to be consumed by Paperless.
+
+   ``PASSPHRASE``
+     This is the passphrase Paperless uses to encrypt/decrypt the original
+     document.  The default value attempts to source the passphrase from the
+     environment, so if you don't set it to a static value here, you must set
+     ``PAPERLESS_PASSPHRASE=some-secret-string`` on the command line whenever
+     invoking the consumer or webserver.
+
+   ``OCR_THREADS``
+     This is the number of threads the OCR process will spawn to process
+     document pages in parallel. The default value gets sourced from the
+     environment-variable ``PAPERLESS_OCR_THREADS`` and expects it to be an
+     integer. If the variable is not set, Python determines the core-count of
+     your CPU and uses that value.
+
 4. Initialise the database with ``./manage.py migrate``.
 5. Create a user for your Paperless instance with
    ``./manage.py createsuperuser``. Follow the prompts to create your user.
@@ -92,20 +98,25 @@ Vagrant Method
    provisioned...
 3. Run ``vagrant ssh`` and once inside your new vagrant box, edit
    ``/opt/paperless/src/paperless/settings.py`` and set the values for:
-    * ``CONSUMPTION_DIR``: this is where your documents will be dumped to be
-      consumed by Paperless.
-    * ``PASSPHRASE``: this is the passphrase Paperless uses to encrypt/decrypt
-      the original document.  The default value attempts to source the
-      passphrase from the environment, so if you don't set it to a static value
-      here, you must set ``PAPERLESS_PASSPHRASE=some-secret-string`` on the
-      command line whenever invoking the consumer or webserver.
+
+   ``CONSUMPTION_DIR``
+     This is where your documents will be dumped to be consumed by Paperless.
+
+   ``PASSPHRASE``
+     This is the passphrase Paperless uses to encrypt/decrypt the original
+     document.  The default value attempts to source the passphrase from the
+     environment, so if you don't set it to a static value here, you must set
+     ``PAPERLESS_PASSPHRASE=some-secret-string`` on the command line whenever
+     invoking the consumer or webserver.
+
 4. Initialise the database with ``/opt/paperless/src/manage.py migrate``.
 5. Still inside your vagrant box, create a user for your Paperless instance with
    ``/opt/paperless/src/manage.py createsuperuser``. Follow the prompts to
    create your user.
-6. Start the webserver with ``/opt/paperless/src/manage.py runserver 0.0.0.0:8000``.
-   You should now be able to visit your (empty) `Paperless webserver`_ at
-   ``172.28.128.4:8000``.  You can login with the user/pass you created in #5.
+6. Start the webserver with
+   ``/opt/paperless/src/manage.py runserver 0.0.0.0:8000``. You should now be
+   able to visit your (empty) `Paperless server`_ at ``172.28.128.4:8000``. You
+   can login with the user/pass you created in #5.
 7. In a separate window, run ``vagrant ssh`` again, but this time once inside
    your vagrant instance, you should start the consumer script with
    ``/opt/paperless/src/manage.py document_consumer``.

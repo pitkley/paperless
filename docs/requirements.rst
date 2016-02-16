@@ -11,6 +11,10 @@ should work) that has the following software installed on it:
 * `Tesseract`_
 * `Imagemagick`_
 
+.. NOTE::
+   You can also use Vagrant for simpler deployment, see :ref:`Installation &
+   Configuration <setup-installation>` for more information.
+
 .. _Python3: https://python.org/
 .. _GNU Privacy Guard: https://gnupg.org
 .. _Tesseract: https://github.com/tesseract-ocr
@@ -46,7 +50,7 @@ well as ImageMagick:
 
 .. _run into problems: https://github.com/danielquinn/paperless/issues/25
 
-.. code:: bash
+.. code-block:: bash
 
     $ brew install ghostscript
     $ brew install imagemagick
@@ -60,7 +64,7 @@ Python-specific Requirements: No Virtualenv
 If you don't care to use a virtual env, then installation of the Python
 dependencies is easy:
 
-.. code:: bash
+.. code-block:: bash
 
     $ pip install --user --requirement /path/to/paperless/requirements.txt
 
@@ -77,7 +81,7 @@ Python-specific Requirements: Virtualenv
 Using a virtualenv for this is pretty straightforward: create a virtualenv,
 enter it, and install the requirements using the ``requirements.txt`` file:
 
-.. code:: bash
+.. code-block:: bash
 
     $ virtualenv --python=/path/to/python3 /path/to/arbitrary/directory
     $ . /path/to/arbitrary/directory/bin/activate
@@ -96,7 +100,7 @@ As generation of the documentation is not required for use of *Paperless*,
 dependencies for this process are not included in ``requirements.txt``.  If
 you'd like to generate your own docs locally, you'll need to:
 
-.. code:: bash
+.. code-block:: bash
 
     $ pip install sphinx
 

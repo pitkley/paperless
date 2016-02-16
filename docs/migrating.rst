@@ -20,7 +20,7 @@ on the directory containing the project files, and then use Django's ``migrate``
 command to execute any database schema updates that might have been rolled in
 as part of the update:
 
-.. code:: bash
+.. code-block:: bash
 
     $ cd /path/to/project
     $ git pull
@@ -46,11 +46,11 @@ names contain the tag names, but you still need to define the tags and their
 matching algorithms in the database for things to work properly.  We do this
 with Django's ``dumpdata`` command, which produces JSON output.
 
-.. code:: bash
+.. code-block:: bash
 
     $ cd /path/to/project
     $ cd src
-    $ ./manage.py document_export /path/to/arbitrary/place/
+    $ ./manage.py document_exporter /path/to/arbitrary/place/
     $ ./manage.py dumpdata documents.Tag > /path/to/arbitrary/place/tags.json
 
 
@@ -66,7 +66,7 @@ create an empty database (just follow the
 ``tags.json`` file you created as part of your backup.  Lastly, copy your
 exported documents into the consumption directory and start up the consumer.
 
-.. code:: bash
+.. code-block:: bash
 
     $ cd /path/to/project
     $ rm data/db.sqlite3  # Delete the database

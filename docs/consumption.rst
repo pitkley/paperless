@@ -129,7 +129,7 @@ following name/value pairs:
   uploading stuff to your server.  The means of generating this signature is
   defined below.
 
-Specify ``enctype="multipart/form-data"``, and then POST your file with:::
+Specify ``enctype="multipart/form-data"``, and then POST your file with::
 
     Content-Disposition: form-data; name="document"; filename="whatever.pdf"
 
@@ -151,7 +151,7 @@ generate a hexdigest.
 
 If you're using Python, this is what that looks like:
 
-.. code:: python
+.. code-block:: python
 
     from hashlib import sha256
     signature = sha256(sender + title + secret).hexdigest()
