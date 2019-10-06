@@ -138,11 +138,33 @@ class MatchingModel(models.Model):
             ==>
           ["some", "random", "words", "with+quotes", "and", "spaces"]
         """
+
+        # We are escaping the match provided, although we unescape spaces again
+        # to not break the existing splitting logic. In addition, prior to
+        # Python 3.7, we need to unescape a further set of characters which
+        # were retrieved from
+        # https://docs.python.org/3/library/re.html#re.escape.
+        match = re.escape(self.match) \
+            .replace("\\ ", " ") \
+            .replace("\\!", "!") \
+            .replace('\\"', '"') \
+            .replace("\\%", "%") \
+            .replace("\\'", "'") \
+            .replace("\\,", ",") \
+            .replace("\\/", "/") \
+            .replace("\\:", ":") \
+            .replace("\\;", ";") \
+            .replace("\\<", "<") \
+            .replace("\\=", "=") \
+            .replace("\\>", ">") \
+            .replace("\\@", "@") \
+            .replace("\\`", "`")
+
         findterms = re.compile(r'"([^"]+)"|(\S+)').findall
         normspace = re.compile(r"\s+").sub
         return [
             normspace(" ", (t[0] or t[1]).strip()).replace(" ", r"\s+")
-            for t in findterms(self.match)
+            for t in findterms(match)
         ]
 
     def save(self, *args, **kwargs):
